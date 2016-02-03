@@ -2,8 +2,6 @@
 
 Pimatic plugin for the RFXcom
 
-### I altered some code within the rfxcom library.. still needs some attention.. Will try to solve this soon.
-
 # Demo config - plugin
 
 ```
@@ -72,3 +70,21 @@ At the moment only the devices below are supported.
     }
 ```
 
+
+
+## Lighting 1 switch
+If you want to work you have do add this piece of code to the file at the bottom:
+```
+node_modules/rfxcom/lib/lighting1.js
+```
+
+```
+/*
+ * Switch on/off deviceId/unitCode, command (on or off)
+ */
+Lighting1.prototype.turn = function(deviceId, command, callback)
+{
+    command = command || command == 'on' ? 0x01 : 0x00;
+    return this._sendCommand(deviceId, command, callback);
+};
+```
