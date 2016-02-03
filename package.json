@@ -1,7 +1,7 @@
 {
-  "name": "pimatic-plugin-template",
-  "description": "The plugin description",
-  "author": "Your Name <you@example.com> (http://your-website)",
+  "name": "pimatic-rfxcom",
+  "description": "This plugin will communicate with the RFXcom used to send 433 signals: http://www.rfxcom.com",
+  "author": "Tim van de Vathorst <infi@timvandevathorst.nl> (http://timvandevathorst.nl)",
   "main": "rfxcom-plugin",
   "files": [
     "rfxcom-plugin.coffee",
@@ -13,7 +13,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git://github.com/pimatic/pimatic-plugin-template.git"
+    "url": "git://github.com/Timvdv/pimatic-rfxcom.git"
   },
   "configSchema": "rfxcom-plugin-config-schema.coffee",
   "dependencies": {
