@@ -1,42 +1,18 @@
-# #Plugin template
+# Pimatic RFXCom plugin
+# Tim van de Vathorst
+# https://github.com/Timvdv/pimatic-rfxcom
 
-# This is an plugin template and mini tutorial for creating pimatic plugins. It will explain the 
-# basics of how the plugin system works and how a plugin should look like.
-
-# ##The plugin code
-
-# Your plugin must export a single function, that takes one argument and returns a instance of
-# your plugin class. The parameter is an envirement object containing all pimatic related functions
-# and classes. See the [startup.coffee](http://sweetpi.de/pimatic/docs/startup.html) for details.
 module.exports = (env) ->
 
-  # ###require modules included in pimatic
-  # To require modules that are included in pimatic use `env.require`. For available packages take 
-  # a look at the dependencies section in pimatics package.json
-
-  # Require the  bluebird promise library
   Promise = env.require 'bluebird'
-
-  # Require the [cassert library](https://github.com/rhoot/cassert).
   assert = env.require 'cassert'
 
   # Include rfxcom lib
   rfxcom = require 'rfxcom'
 
-  # ###MyPlugin class
-  # Create a class that extends the Plugin class and implements the following functions:
+  #Create a class that extends the Plugin class
+  # and implements the following functions
   class RFXComPlugin extends env.plugins.Plugin
-
-    # ####init()
-    # The `init` function is called by the framework to ask your plugin to initialise.
-    #  
-    # #####params:
-    #  * `app` is the [express] instance the framework is using.
-    #  * `framework` the framework itself
-    #  * `config` the properties the user specified as config for your plugin in the `plugins` 
-    #     section of the config.json file 
-    #     
-    # 
     lightwave1: null
     lightwave2: null
 
@@ -45,28 +21,28 @@ module.exports = (env) ->
       deviceConfigDef = require("./device-config-schema")
 
       #init the different device types
-      @framework.deviceManager.registerDeviceClass("RFXComDevice", {      
+      @framework.deviceManager.registerDeviceClass("RFXComDevice", {
         configDef: deviceConfigDef.RFXComDevice,
 
         createCallback: (config) =>
-            new RFXComDevice(config)
+          new RFXComDevice(config)
       })
 
       @framework.deviceManager.registerDeviceClass("RfxComPir", {
         configDef: deviceConfigDef.RfxComPir,
 
         createCallback: (config) =>
-            new RfxComPir(config, rfxtrx)
-      })    
+          new RfxComPir(config, rfxtrx)
+      })
 
       @framework.deviceManager.registerDeviceClass("RfxComContactSensor", {
         configDef: deviceConfigDef.RfxComContactSensor,
 
         createCallback: (config) =>
-            new RfxComContactSensor(config, rfxtrx)
-      })          
+          new RfxComContactSensor(config, rfxtrx)
+      })
 
-      #initialize the lib with the correct vars  
+      # initialize the lib with the correct vars
       rfxtrx = new rfxcom.RfxCom(config.usb, {debug: config.debug})
 
       #only lightwave 1 and 2 supported ATM
@@ -99,7 +75,7 @@ module.exports = (env) ->
           this.lightwave2.switchOff(deviceId)
 
   class RFXComDevice extends env.devices.PowerSwitch
-    actions: 
+    actions:
       turnOn:
         description: "turns the switch on"
       turnOff:
@@ -110,7 +86,7 @@ module.exports = (env) ->
           state:
             type: Boolean
 
-    template: "switch"      
+    template: "switch"
 
     constructor: (@config) ->
       @id = config.id
@@ -151,7 +127,7 @@ module.exports = (env) ->
       super()
 
   class RfxComPir extends env.devices.PresenceSensor
-    actions: 
+    actions:
       getPresence:
         description: "Get presence.."
         params:
@@ -169,27 +145,25 @@ module.exports = (env) ->
       )
 
       rfxtrx.on('lighting2', (evt) =>
-          id = evt.id
-          unitCode = evt.unitCode
-          command = evt.command = "On" ? true : false;
+        id = evt.id
+        unitCode = evt.unitCode
+        command = evt.command = "On" ? true : false
           
-          if id == @code
-            if command
-              @_setPresence(yes)
-            else
-              @_setPresence(no)
+        if id == @code
+          if command
+            @_setPresence(yes)
+          else
+            @_setPresence(no)
 
-            if @config.autoReset is true
-              clearTimeout(@_resetPresenceTimeout)
-              @_resetPresenceTimeout = setTimeout(( =>
-                @_setPresence(no)
-              ), @config.resetTime)
+          if @config.autoReset is true
+            clearTimeout(@_resetPresenceTimeout)
+            @_resetPresenceTimeout = setTimeout(( =>
+              @_setPresence(no)
+            ), @config.resetTime)
       )
       super()
 
     getPresence: -> Promise.resolve @_presence
 
-  # Create a instance of my plugin
   rfxcom_plugin = new RFXComPlugin
-  # and return it to the framework.
   return rfxcom_plugin
