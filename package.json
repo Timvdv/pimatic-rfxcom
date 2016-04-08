@@ -20,7 +20,7 @@
   },
   "configSchema": "rfxcom-plugin-config-schema.coffee",
   "dependencies": {
-    "rfxcom": "^0.7.9"
+    "rfxcom": "^0.8.0"
   },
   "peerDependencies": {
     "pimatic": ">=0.8.0 <1.0.0"
