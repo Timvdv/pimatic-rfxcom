@@ -43,13 +43,13 @@ module.exports = (env) ->
       })
 
       # initialize the lib with the correct vars
-      rfxtrx = new rfxcom.RfxCom(config.usb, {debug: config.debug})
+      rfxtrx = new rfxcom.RfxCom(@config.usb, {debug: @config.debug})
 
       #only lightwave 1 and 2 supported ATM
       this.lightwave1 = new rfxcom.Lighting1(rfxtrx, rfxcom.lighting1.ARC)
       this.lightwave2 = new rfxcom.Lighting2(rfxtrx, rfxcom.lighting2.AC)
 
-      if(config.debug)
+      if(@config.debug)
         #when a command is received
         rfxtrx.on "receive",  (evt) ->
           env.logger.info("custom Received: " + evt)
@@ -89,10 +89,10 @@ module.exports = (env) ->
     template: "switch"
 
     constructor: (@config) ->
-      @id = config.id
-      @name = config.name
-      @code = config.code
-      @packetType = config.packetType
+      @id = @config.id
+      @name = @config.name
+      @code = @config.code
+      @packetType = @config.packetType
       super()
 
     changeStateTo: (state) ->
@@ -109,9 +109,9 @@ module.exports = (env) ->
     template: "contact"
 
     constructor: (@config, rfxtrx) ->
-      @id = config.id
-      @name = config.name
-      @code = config.code
+      @id = @config.id
+      @name = @config.name
+      @code = @config.code
       @_contact = lastState?.contact?.value or false
 
       rfxtrx.on('lighting2', (evt) =>
@@ -135,9 +135,9 @@ module.exports = (env) ->
             type: Boolean
             
     constructor: (@config, rfxtrx) ->
-      @id = config.id
-      @name = config.name
-      @code = config.code
+      @id = @config.id
+      @name = @config.name
+      @code = @config.code
       @_presence = false #need to add last state support later
 
       resetPresence = ( =>
