@@ -13,7 +13,7 @@
   ],
   "version": "0.8.1",
   "homepage": "http://timvandevathorst.nl",
-  "private": true,
+  "private": false,
   "repository": {
     "type": "git",
     "url": "git://github.com/Timvdv/pimatic-rfxcom.git"
