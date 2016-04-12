@@ -11,7 +11,7 @@
     "LICENSE",
     "device-config-schema.coffee"
   ],
-  "version": "0.8.0",
+  "version": "0.8.1",
   "homepage": "http://timvandevathorst.nl",
   "private": true,
   "repository": {
@@ -20,7 +20,7 @@
   },
   "configSchema": "rfxcom-plugin-config-schema.coffee",
   "dependencies": {
-    "rfxcom": "^0.9.0"
+    "rfxcom": "0.9.x"
   },
   "peerDependencies": {
     "pimatic": ">=0.8.0 <1.0.0"
