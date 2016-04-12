@@ -2,11 +2,14 @@
   "name": "pimatic-rfxcom",
   "description": "This plugin will communicate with the RFXcom used to send 433 signals: http://www.rfxcom.com",
   "author": "Tim van de Vathorst <infi@timvandevathorst.nl> (http://timvandevathorst.nl)",
+  "license": "GPL-2.0",
   "main": "rfxcom-plugin",
   "files": [
     "rfxcom-plugin.coffee",
     "README.md",
-    "rfxcom-plugin-config-schema.coffee"
+    "rfxcom-plugin-config-schema.coffee",
+    "LICENSE",
+    "device-config-schema.coffee"
   ],
   "version": "0.8.0",
   "homepage": "http://timvandevathorst.nl",
@@ -17,10 +20,10 @@
   },
   "configSchema": "rfxcom-plugin-config-schema.coffee",
   "dependencies": {
-    "rfxcom": "^0.7.9"
+    "rfxcom": "^0.8.0"
   },
   "peerDependencies": {
-    "pimatic": "0.8.*"
+    "pimatic": ">=0.8.0 <1.0.0"
   },
   "engines": {
     "node": ">0.8.x",
