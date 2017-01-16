@@ -6,6 +6,8 @@
   "main": "rfxcom-plugin",
   "files": [
     "rfxcom-plugin.coffee",
+    "rfxcom-protocol.coffee",
+    "devices/rfxcom-power-switch.coffee",
     "README.md",
     "rfxcom-plugin-config-schema.coffee",
     "LICENSE",
@@ -20,6 +22,7 @@
   },
   "configSchema": "rfxcom-plugin-config-schema.coffee",
   "dependencies": {
+    "pimatic-plugin-commons": "^0.9.3",
     "rfxcom": "0.9.x"
   },
   "peerDependencies": {

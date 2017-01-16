@@ -1,6 +1,6 @@
 module.exports ={
   title: "pimatic-rfxcom device config schemas"
-  RFXComDevice: {
+  RfxComPowerSwitch: {
     title: "Rfxcom config options"
     type: "object"
     properties:
@@ -16,7 +16,7 @@ module.exports ={
       packetType:
         description: "The lighting type old KaKu models use lighting1 new ones lighting2"
         type: "string"
-  },
+  }
   RfxComPir: {
     title: "Rfxcom config options"
     type: "object"

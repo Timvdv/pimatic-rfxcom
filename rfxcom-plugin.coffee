@@ -3,108 +3,85 @@
 # https://github.com/Timvdv/pimatic-rfxcom
 
 module.exports = (env) ->
-
   Promise = env.require 'bluebird'
   assert = env.require 'cassert'
+  commons = require('pimatic-plugin-commons')(env)
+  RfxComProtocol = require('./rfxcom-protocol')(env)
 
-  # Include rfxcom lib
-  rfxcom = require 'rfxcom'
+  deviceConfigTemplates = [
+    {
+      "name": "RFXCom Power Switch"
+      "class": "RfxComPowerSwitch"
+    }
+  ]
 
-  #Create a class that extends the Plugin class
-  # and implements the following functions
   class RFXComPlugin extends env.plugins.Plugin
-    lightwave1: null
-    lightwave2: null
-
     init: (app, @framework, @config) =>
-
+      @debug = @config.debug || false
+      @base = commons.base @, 'Plugin'
       deviceConfigDef = require("./device-config-schema")
+      @protocolHandler = new RfxComProtocol @config
 
-      #init the different device types
-      @framework.deviceManager.registerDeviceClass("RFXComDevice", {
-        configDef: deviceConfigDef.RFXComDevice,
+      for device in deviceConfigTemplates
+        className = device.class
+          
+        # convert camel-case classname to kebap-case filename
+        filename = className.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
 
-        createCallback: (config) =>
-          new RFXComDevice(config)
-      })
+        #really ugly fix to preserve the classnames (rfx-com to rfxcom)
+        filename = "rfxcom-" + filename.split("-").splice(2).join("-")
 
-      @framework.deviceManager.registerDeviceClass("RfxComPir", {
-        configDef: deviceConfigDef.RfxComPir,
 
-        createCallback: (config) =>
-          new RfxComPir(config, rfxtrx)
-      })
+        classType = require('./devices/' + filename)(env)
 
-      @framework.deviceManager.registerDeviceClass("RfxComContactSensor", {
-        configDef: deviceConfigDef.RfxComContactSensor,
+        @base.debug "Registering device class #{className}"
+        @framework.deviceManager.registerDeviceClass(className, {
+          configDef: deviceConfigDef[className],
+          createCallback: @_callbackHandler(className, classType)
+        })
 
-        createCallback: (config) =>
-          new RfxComContactSensor(config, rfxtrx)
-      })
+      # auto-discovery
+      @framework.deviceManager.on('discover', (eventData) =>
+        @framework.deviceManager.discoverMessage 'pimatic-rfxcom', 'Searching for RFXCoM devices, please turn the device on and off'
 
-      # initialize the lib with the correct vars
-      rfxtrx = new rfxcom.RfxCom(@config.usb, {debug: @config.debug})
+        @base.debug "Eventdata:", eventData
+        @base.debug "devices: ", @protocolHandler.getDevices()
 
-      #only lightwave 1 and 2 supported ATM
-      this.lightwave1 = new rfxcom.Lighting1(rfxtrx, rfxcom.lighting1.ARC)
-      this.lightwave2 = new rfxcom.Lighting2(rfxtrx, rfxcom.lighting2.AC)
+        for device in @protocolHandler.getDevices()
 
-      if(@config.debug)
-        #when a command is received
-        rfxtrx.on "receive",  (evt) ->
-          env.logger.info("custom Received: " + evt)
+          #If the device is already added: don't show
+          matched = @framework.deviceManager.devicesConfig.some (element, iterator) =>
+            element.code is device?.code
 
-        rfxtrx.on "lighting2",  (evt) ->
-          env.logger.info("custom lighting2: " + JSON.stringify(evt);)
+          if not matched
+            deviceToText = device?.product
 
-      #make sure pimatic shows an error if this fails
-      rfxtrx.initialise (error) ->
-        if (error)
-          env.logger.error("Unable to initialise the rfx device")
+            # convert spaces to -
+            id = deviceToText.replace(/(\s)/g, '-').toLowerCase()
 
-    sendCommand: (cmdString, state, packetType) ->
-      deviceId = cmdString
+            deviceClass = "RfxComPowerSwitch"
 
-      if(packetType == 'Lighting1')
-        this.lightwave1.turn(deviceId, state)
-
-      if(packetType == 'Lighting2')
-        if(state)
-          this.lightwave2.switchOn(deviceId)
-        else
-          this.lightwave2.switchOff(deviceId)
-
-  class RFXComDevice extends env.devices.PowerSwitch
-    actions:
-      turnOn:
-        description: "turns the switch on"
-      turnOff:
-        description: "turns the switch off"
-      changeStateTo:
-        description: "changes the switch to on or off"
-        params:
-          state:
-            type: Boolean
-
-    template: "switch"
-
-    constructor: (@config) ->
-      @id = @config.id
-      @name = @config.name
-      @code = @config.code
-      @packetType = @config.packetType
-      super()
-
-    changeStateTo: (state) ->
-      if @_state is state then return Promise.resolve true
-      else return Promise.try( =>
-        rfxcom_plugin.sendCommand @code, state, @packetType
-        @_setState state
+            config = {
+              id: id
+              class: deviceClass,
+              name: deviceToText,
+              code: device?.code
+            }
+            
+            @framework.deviceManager.discoveredDevice(
+              'pimatic-rfxcom', "Presence of #{deviceToText}", config
+            )
       )
+    _callbackHandler: (className, classType) ->
+      # this closure is required to keep the className and classType context as part of the iteration
+      return (config, lastState) =>
+        return new classType(config, @, lastState)
 
-    turnOn: -> @changeStateTo on
-    turnOff: -> @changeStateTo off
+  rfxcom_plugin = new RFXComPlugin
+  return rfxcom_plugin
 
+
+###
   class RfxComContactSensor extends env.devices.ContactSensor
     template: "contact"
 
@@ -164,6 +141,4 @@ module.exports = (env) ->
       super()
 
     getPresence: -> Promise.resolve @_presence
-
-  rfxcom_plugin = new RFXComPlugin
-  return rfxcom_plugin
+###
