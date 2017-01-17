@@ -1,3 +1,4 @@
+# coffeelint: disable=max_line_length
 module.exports ={
   title: "pimatic-rfxcom device config schemas"
   RfxComPowerSwitch: {
@@ -13,6 +14,9 @@ module.exports ={
       code:
         description: "The address based on what type you use"
         type: "string"
+      unitcode:
+        description: "The unit based on what type you use"
+        type: "integer"
       packetType:
         description: "The lighting type old KaKu models use lighting1 new ones lighting2"
         type: "string"
@@ -30,19 +34,19 @@ module.exports ={
       code:
         description: "The address based on what type you use"
         type: "string"
-      unit:
-        description: "unit code"
+      unitcode:
+        description: "The unit based on what type you use"
         type: "integer"
       packetType:
         description: "The lighting type old KaKu models use lighting1 new ones lighting2"
         type: "string"
       resetTime:
         description: "the reset time."
-        type: "integer"       
+        type: "integer"
       autoReset:
         description: "enable reset yes or no."
-        type: "boolean"                
-  }  
+        type: "boolean"
+  }
   RfxComContactSensor: {
     title: "Rfxcom config options"
     type: "object"
@@ -56,17 +60,17 @@ module.exports ={
       code:
         description: "The address based on what type you use"
         type: "string"
-      unit:
-        description: "unit code"
+      unitcode:
+        description: "The unit based on what type you use"
         type: "integer"
       packetType:
         description: "The lighting type old KaKu models use lighting1 new ones lighting2"
-        type: "string"    
+        type: "string"
       resetTime:
         description: "the reset time."
-        type: "integer"       
+        type: "integer"
       autoReset:
         description: "enable reset yes or no."
-        type: "boolean"                         
+        type: "boolean"
   }
 }

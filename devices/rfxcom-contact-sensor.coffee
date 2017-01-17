@@ -5,7 +5,7 @@ module.exports = (env) ->
   _ = env.require 'lodash'
   commons = require('pimatic-plugin-commons')(env)
 
-  class RfxComPowerSwitch extends env.devices.PowerSwitch
+  class RfxComContactSensor extends env.devices.ContactSensor
     actions:
       turnOn:
         description: "turns the switch on"
@@ -17,21 +17,26 @@ module.exports = (env) ->
           state:
             type: Boolean
 
-    template: "switch"
+    template: "contact"
 
     constructor: (@config, @plugin, lastState) ->
       @_base = commons.base @, @config.class
       @debug = @plugin.debug || false
+      @autoReset = @config.autoReset
+      @resetTimer = @config.resetTime
 
       @id = @config.id
       @name = @config.name
       @code = @config.code
       @unitcode = @config.unitcode
+
       @packetType = @config.packetType
+
+      @_contact = lastState?.contact?.value or false
+      @_resetContactTimeout = null
 
       @responseHandler = @_createResponseHandler()
       @plugin.protocolHandler.on 'response', @responseHandler
-      @_state = lastState?.state?.value or false
       super()
 
     destroy: () ->
@@ -41,24 +46,14 @@ module.exports = (env) ->
 
     _createResponseHandler: () =>
       return (device) =>
-        _device = if @code is device.code and @unitcode is device.unitcode then device.code else null
-        data = device.response
-
-        @_base.info "Device:", device
-
-        if _device? && data.class_id
-          @_setState data.value
-
-    changeStateTo: (newState) ->
-      return new Promise (resolve, reject) =>
-        @plugin.protocolHandler.sendRequest(@code, newState, @packetType)
-
-        @_setState newState
-        resolve()
-
-    turnOn: -> @changeStateTo on
-    turnOff: -> @changeStateTo off
+        if device.response.code == @code
+          hasContact = device.response.level == 0 ? false : true
+          @_setContact(hasContact)
+          if @autoReset is true
+            clearTimeout(@_resetContactTimeout)
+            @_resetContactTimeout = setTimeout(( =>
+              @_setContact(!hasContact)
+            ), @resetTimer)
 
     getState: () ->
       return Promise.resolve @_state
- 

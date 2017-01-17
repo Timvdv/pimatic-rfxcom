@@ -1,6 +1,7 @@
 # Pimatic RFXCom plugin
 # Tim van de Vathorst
 # https://github.com/Timvdv/pimatic-rfxcom
+# coffeelint: disable=max_line_length
 
 module.exports = (env) ->
   Promise = env.require 'bluebird'
@@ -12,6 +13,10 @@ module.exports = (env) ->
     {
       "name": "RFXCom Power Switch"
       "class": "RfxComPowerSwitch"
+    },
+    {
+      "name": "RFXCom Contact Sensor"
+      "class": "RfxComContactSensor"
     }
   ]
 
@@ -31,7 +36,6 @@ module.exports = (env) ->
         #really ugly fix to preserve the classnames (rfx-com to rfxcom)
         filename = "rfxcom-" + filename.split("-").splice(2).join("-")
 
-
         classType = require('./devices/' + filename)(env)
 
         @base.debug "Registering device class #{className}"
@@ -42,7 +46,7 @@ module.exports = (env) ->
 
       # auto-discovery
       @framework.deviceManager.on('discover', (eventData) =>
-        @framework.deviceManager.discoverMessage 'pimatic-rfxcom', 'Searching for RFXCoM devices, please turn the device on and off'
+        @framework.deviceManager.discoverMessage 'pimatic-rfxcom', 'Please turn RFXCoM devices on and off. After that press discover devices again.'
 
         @base.debug "Eventdata:", eventData
         @base.debug "devices: ", @protocolHandler.getDevices()
@@ -51,25 +55,20 @@ module.exports = (env) ->
 
           #If the device is already added: don't show
           matched = @framework.deviceManager.devicesConfig.some (element, iterator) =>
-            element.code is device?.code
+            element.code is device?.code and element.unitcode is device?.unitcode
 
           if not matched
-            deviceToText = device?.product
-
-            # convert spaces to -
-            id = deviceToText.replace(/(\s)/g, '-').toLowerCase()
-
-            deviceClass = "RfxComPowerSwitch"
-
             config = {
-              id: id
-              class: deviceClass,
-              name: deviceToText,
+              id: device?.id
+              name: device?.id
+              class: "RfxComPowerSwitch"
+              unitcode: device?.unitcode
               code: device?.code
+              packetType: device?.packetType
             }
-            
+
             @framework.deviceManager.discoveredDevice(
-              'pimatic-rfxcom', "Presence of #{deviceToText}", config
+              'pimatic-rfxcom', "Presence of #{device?.id}", config
             )
       )
     _callbackHandler: (className, classType) ->
@@ -80,28 +79,7 @@ module.exports = (env) ->
   rfxcom_plugin = new RFXComPlugin
   return rfxcom_plugin
 
-
 ###
-  class RfxComContactSensor extends env.devices.ContactSensor
-    template: "contact"
-
-    constructor: (@config, rfxtrx) ->
-      @id = @config.id
-      @name = @config.name
-      @code = @config.code
-      @_contact = lastState?.contact?.value or false
-
-      rfxtrx.on('lighting2', (evt) =>
-        if evt.id == @code
-          hasContact = evt.level == 0 ? false : true
-          @_setContact(hasContact)
-          if @config.autoReset is true
-            clearTimeout(@_resetContactTimeout)
-            @_resetContactTimeout = setTimeout(( =>
-              @_setContact(!hasContact)
-            ), @config.resetTime)
-      )
-      super()
 
   class RfxComPir extends env.devices.PresenceSensor
     actions:

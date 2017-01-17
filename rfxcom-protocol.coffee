@@ -18,6 +18,7 @@ module.exports = (env) ->
       @usb = @config.usb
       @debug = @config.debug || false
       @base = commons.base @, 'RFXComProtocol'
+
       @on "newListener", =>
         @base.debug "Status response event listeners: #{1 + @listenerCount 'response'}"
 
@@ -46,20 +47,25 @@ module.exports = (env) ->
           @base.error 'Unable to initialise the rfx device: #{error}'
 
       @rfxtrx.on('lighting2', (evt) =>
+        @base.info(evt.id)
         @base.info(JSON.stringify(evt))
 
-        @devices[@code] = {
-          id: @code,
-          code: @code
+        deviceId = "rfx-" + evt.id + "-" + evt.unitcode
+
+        @devices[deviceId] = {
+          id: deviceId
+          code: evt.id
+          unitcode: evt.unitcode
+          packetType: "lighting2"
         }
 
-        @_triggerResponse(evt, @code)
-        #@deviceDiscovery.push(@devices[nodeid])
+        @_triggerResponse(evt, deviceId)
+        @deviceDiscovery.push(@devices[deviceId])
       )
 
-    _triggerResponse: (response, nodeid) ->
+    _triggerResponse: (response, id) ->
       @emit 'response',
-        nodeid: nodeid
+        id: id
         response: response
 
     pause: (ms=50) =>
