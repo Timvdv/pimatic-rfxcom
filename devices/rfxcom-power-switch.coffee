@@ -41,17 +41,18 @@ module.exports = (env) ->
 
     _createResponseHandler: () =>
       return (device) =>
-        _device = if @code is device.code and @unitcode is device.unitcode then device.code else null
-        data = device.response
+        @_base.debug "Device:", device
+        @_base.debug "code:", @code
+        @_base.debug "uniitcode:", @unitcode
 
-        @_base.info "Device:", device
-
-        if _device? && data.class_id
-          @_setState data.value
+        if device.response.code == @code && device.response.unitcode == @unitcode
+          @_setState (device.response.command == "On" ? true : false)
 
     changeStateTo: (newState) ->
       return new Promise (resolve, reject) =>
-        @plugin.protocolHandler.sendRequest(@code, newState, @packetType)
+        @_base.info "pressed switch:", newState
+
+        @plugin.protocolHandler.sendRequest(@code, @unitcode, newState, @packetType)
 
         @_setState newState
         resolve()

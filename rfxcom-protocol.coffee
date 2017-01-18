@@ -29,26 +29,29 @@ module.exports = (env) ->
         debug: @debug
       })
 
-      #only lightwave 1 and 2 supported ATM
-      this.lightwave1 = new rfxcom.Lighting1(@rfxtrx, rfxcom.lighting1.ARC)
-      this.lightwave2 = new rfxcom.Lighting2(@rfxtrx, rfxcom.lighting2.AC)
-
-      if(@debug)
-        #when a command is received
-        @rfxtrx.on "receive",  (evt) ->
-          env.logger.info("custom Received: " + evt)
-
-        @rfxtrx.on "lighting2",  (evt) ->
-          env.logger.info("custom lighting2: " + JSON.stringify(evt);)
-
       #make sure pimatic shows an error if this fails
       @rfxtrx.initialise (error) ->
         if (error)
-          @base.error 'Unable to initialise the rfx device: #{error}'
+          env.logger.error('Unable to initialise the rfx device: #{error}')
+        else
+          env.logger.info('Connected with the RFXCoM!')
 
-      @rfxtrx.on('lighting2', (evt) =>
-        @base.info(evt.id)
-        @base.info(JSON.stringify(evt))
+      @rfxtrx.on "connectfailed", (evt) ->
+        env.logger.error('Could not connect to the RFXCoM')
+
+      @rfxtrx.on "disconnect", (evt) ->
+        env.logger.error('RFXCoM disconnected. Check your USB connection.')
+
+      #only lightwave 1 and 2 supported ATM
+      this.lightwave1 = new rfxcom.Lighting1(@rfxtrx, rfxcom.lighting1.ARC)
+      this.lightwave2 = new rfxcom.Lighting2(@rfxtrx, rfxcom.lighting2.AC)
+    
+      #when a command is received
+      @rfxtrx.on "receive",  (evt) ->
+        if @debug then env.logger.info("Received (all types, raw data): " + evt)
+
+      @rfxtrx.on('lighting1', (evt) =>
+        env.logger.info("Received Lighting1: " + evt)
 
         deviceId = "rfx-" + evt.id + "-" + evt.unitcode
 
@@ -56,10 +59,28 @@ module.exports = (env) ->
           id: deviceId
           code: evt.id
           unitcode: evt.unitcode
-          packetType: "lighting2"
+          packetType: "lighting1"
         }
 
         @_triggerResponse(evt, deviceId)
+        @deviceDiscovery.push(@devices[deviceId])
+      )
+
+      @rfxtrx.on('lighting2', (evt) =>
+        #@base.info(JSON.stringify(evt))
+        env.logger.info("lighting2: " + JSON.stringify(evt);)
+
+        deviceId = "rfx-" + evt.id + "-" + evt.unitcode
+
+        @devices[deviceId] = {
+          id: deviceId
+          code: evt.id
+          unitcode: evt.unitcode
+          command: evt.command
+          packetType: "lighting2"
+        }
+
+        @_triggerResponse(@devices[deviceId], deviceId)
         @deviceDiscovery.push(@devices[deviceId])
       )
 
@@ -79,18 +100,15 @@ module.exports = (env) ->
         @base.debug("request update!!")
         resolve()
 
-    sendRequest: (command, value, packetType, type="switch") =>
+    sendRequest: (code, unitcode, value, packetType, type="switch") =>
       return new Promise (resolve, reject) =>
-        @base.debug "Command:", command, "value: ", value
+        @base.debug("code: " + code + " - unitcode: " + unitcode + " - packetType: " + packetType + " - value: " + value)
+        
+        if packetType == 'lighting1'
+          this.lightwave1.turn(code, value)
 
-        if(packetType == 'Lighting1')
-          this.lightwave1.turn(command, value)
-
-        if(packetType == 'Lighting2')
-          if(value)
-            this.lightwave2.switchOn(command)
-          else
-            this.lightwave2.switchOff(command)
+        if packetType == 'lighting2'
+          if value then this.lightwave2.switchOn(code + "/" + unitcode) else this.lightwave2.switchOff(code + "/" + unitcode)
 
         resolve()
 

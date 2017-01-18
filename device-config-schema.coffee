@@ -21,7 +21,7 @@ module.exports ={
         description: "The lighting type old KaKu models use lighting1 new ones lighting2"
         type: "string"
   }
-  RfxComPir: {
+  RfxComPirSensor: {
     title: "Rfxcom config options"
     type: "object"
     properties:

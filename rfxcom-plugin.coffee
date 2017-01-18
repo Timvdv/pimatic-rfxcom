@@ -2,7 +2,6 @@
 # Tim van de Vathorst
 # https://github.com/Timvdv/pimatic-rfxcom
 # coffeelint: disable=max_line_length
-
 module.exports = (env) ->
   Promise = env.require 'bluebird'
   assert = env.require 'cassert'
@@ -17,6 +16,10 @@ module.exports = (env) ->
     {
       "name": "RFXCom Contact Sensor"
       "class": "RfxComContactSensor"
+    },
+    {
+      "name": "RFXCom Pir Sensor"
+      "class": "RfxComPirSensor"
     }
   ]
 
@@ -78,45 +81,3 @@ module.exports = (env) ->
 
   rfxcom_plugin = new RFXComPlugin
   return rfxcom_plugin
-
-###
-
-  class RfxComPir extends env.devices.PresenceSensor
-    actions:
-      getPresence:
-        description: "Get presence.."
-        params:
-          state:
-            type: Boolean
-            
-    constructor: (@config, rfxtrx) ->
-      @id = @config.id
-      @name = @config.name
-      @code = @config.code
-      @_presence = false #need to add last state support later
-
-      resetPresence = ( =>
-        @_setPresence(no)
-      )
-
-      rfxtrx.on('lighting2', (evt) =>
-        id = evt.id
-        unitCode = evt.unitCode
-        command = evt.command = "On" ? true : false
-          
-        if id == @code
-          if command
-            @_setPresence(yes)
-          else
-            @_setPresence(no)
-
-          if @config.autoReset is true
-            clearTimeout(@_resetPresenceTimeout)
-            @_resetPresenceTimeout = setTimeout(( =>
-              @_setPresence(no)
-            ), @config.resetTime)
-      )
-      super()
-
-    getPresence: -> Promise.resolve @_presence
-###
