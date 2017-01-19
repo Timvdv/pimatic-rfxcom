@@ -43,11 +43,14 @@ module.exports = (env) ->
       @_base.cancelUpdate()
       @plugin.protocolHandler.removeListener 'response', @responseHandler
       super()
-
+    
     _createResponseHandler: () =>
       return (device) =>
-        if device.response.code == @code
-          hasContact = device.response.level == 0 ? false : true
+        @_base.debug "device:", device
+
+        if device.response.code == @code && device.response.unitcode == @unitcode
+          hasContact = (device.response.command == 'Off' ? false : true)
+
           @_setContact(hasContact)
           if @autoReset is true
             clearTimeout(@_resetContactTimeout)

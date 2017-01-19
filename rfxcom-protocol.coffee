@@ -67,6 +67,7 @@ module.exports = (env) ->
       )
 
       @rfxtrx.on('lighting2', (evt) =>
+        @deviceDiscovery = [];
         #@base.info(JSON.stringify(evt))
         env.logger.info("lighting2: " + JSON.stringify(evt);)
 
@@ -78,10 +79,21 @@ module.exports = (env) ->
           unitcode: evt.unitcode
           command: evt.command
           packetType: "lighting2"
+          classname: "RfxComPowerSwitch"
         }
 
         @_triggerResponse(@devices[deviceId], deviceId)
         @deviceDiscovery.push(@devices[deviceId])
+
+        #Push 3 times with different classnames (because I don't know which classname they want)
+        #@TODO: put this in a for loop.
+        a = JSON.parse(JSON.stringify(@devices[deviceId]))
+        a.classname = "RfxComContactSensor"
+        @deviceDiscovery.push(a)
+
+        b = JSON.parse(JSON.stringify(@devices[deviceId]))
+        b.classname = "RfxComPirSensor"
+        @deviceDiscovery.push(b)
       )
 
     _triggerResponse: (response, id) ->

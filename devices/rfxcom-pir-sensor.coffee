@@ -29,6 +29,10 @@ module.exports = (env) ->
       @responseHandler = @_createResponseHandler()
       @_resetPresenceTimeout = null
       @plugin.protocolHandler.on 'response', @responseHandler
+      
+      resetPresence = ( =>
+        @_setPresence(no)
+      )
       super()
 
     destroy: () ->
@@ -40,7 +44,7 @@ module.exports = (env) ->
       return (device) =>
         id = evt.code
         unitCode = evt.unitCode
-        command = evt.command = "On" ? true : false
+        command = evt.command = "Off" ? false : true
           
         if device.response.code == @code
           if command then @_setPresence(yes) else @_setPresence(no)
