@@ -105,10 +105,12 @@ module.exports = (env) ->
         @base.debug("code: " + code + " - unitcode: " + unitcode + " - packetType: " + packetType + " - value: " + value)
         
         if packetType == 'lighting1'
-          this.lightwave1.turn(code, value)
+          if type == 'switch'
+            if value then this.lightwave1.switchOn(code + "" + unitcode) else this.lightwave1.switchOff(code + "" + unitcode)
 
         if packetType == 'lighting2'
-          if value then this.lightwave2.switchOn(code + "/" + unitcode) else this.lightwave2.switchOff(code + "/" + unitcode)
+          if type == 'switch'
+            if value then this.lightwave2.switchOn(code + "/" + unitcode) else this.lightwave2.switchOff(code + "/" + unitcode)
 
         resolve()
 

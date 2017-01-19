@@ -50,8 +50,6 @@ module.exports = (env) ->
 
     changeStateTo: (newState) ->
       return new Promise (resolve, reject) =>
-        @_base.info "pressed switch:", newState
-
         @plugin.protocolHandler.sendRequest(@code, @unitcode, newState, @packetType)
 
         @_setState newState
