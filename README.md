@@ -2,6 +2,10 @@
 
 Pimatic plugin for the RFXcom
 
+# ATTENTION: example config not up to date.
+see: https://forum.pimatic.org/topic/2763/pimatic-rfxcom-major-update-1-0-0
+
+
 # Demo config - plugin
 
 ```
