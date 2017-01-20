@@ -46,9 +46,8 @@ module.exports = (env) ->
     
     _createResponseHandler: () =>
       return (device) =>
-        @_base.debug "device:", device
-
         if device.response.code == @code && device.response.unitcode == @unitcode
+          @_base.debug "Contact sensor:", device
           hasContact = (device.response.command == 'Off' ? false : true)
 
           @_setContact(hasContact)

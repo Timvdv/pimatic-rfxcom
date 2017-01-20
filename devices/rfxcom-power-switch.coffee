@@ -41,11 +41,10 @@ module.exports = (env) ->
 
     _createResponseHandler: () =>
       return (device) =>
-        @_base.debug "Device:", device
-        @_base.debug "code:", @code
-        @_base.debug "unitcode:", @unitcode
-
         if device.response.code == @code && device.response.unitcode == @unitcode
+          @_base.debug "Device:", device
+          @_base.debug "code:", @code
+          @_base.debug "unitcode:", @unitcode          
           @_setState (device.response.command == "On" ? true : false)
 
     changeStateTo: (newState) ->

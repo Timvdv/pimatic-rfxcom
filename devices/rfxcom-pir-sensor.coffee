@@ -42,12 +42,13 @@ module.exports = (env) ->
 
     _createResponseHandler: () =>
       return (device) =>
-        id = evt.code
-        unitCode = evt.unitCode
-        command = evt.command = "Off" ? false : true
-          
-        if device.response.code == @code
-          if command then @_setPresence(yes) else @_setPresence(no)
+        if device.response.code == @code && device.response.unitcode == @unitcode
+          @_base.debug "PIR sensor:", device
+
+          id = device.response.code
+          unitCode = device.response.unitCode
+
+          if device.response.command == "Off" then @_setPresence(no) else @_setPresence(yes)
 
           if @config.autoReset is true
             clearTimeout(@_resetPresenceTimeout)
