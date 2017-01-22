@@ -14,6 +14,10 @@ module.exports = (env) ->
       "class": "RfxComPowerSwitch"
     },
     {
+      "name": "RFXCom Dimmer Switch"
+      "class": "RfxComDimmerSwitch"
+    },
+    {
       "name": "RFXCom Contact Sensor"
       "class": "RfxComContactSensor"
     },

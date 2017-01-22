@@ -94,6 +94,10 @@ module.exports = (env) ->
         b = JSON.parse(JSON.stringify(@devices[deviceId]))
         b.classname = "RfxComPirSensor"
         @deviceDiscovery.push(b)
+
+        c = JSON.parse(JSON.stringify(@devices[deviceId]))
+        c.classname = "RfxComDimmerSwitch"
+        @deviceDiscovery.push(c)
       )
 
     _triggerResponse: (response, id) ->
@@ -119,10 +123,14 @@ module.exports = (env) ->
         if packetType == 'lighting1'
           if type == 'switch'
             if value then this.lightwave1.switchOn(code + "" + unitcode) else this.lightwave1.switchOff(code + "" + unitcode)
-
+          if type == 'dimmerSwitch'
+            @base.error("Lighting1 dimmerswitches not supported!! sorry :((")
         if packetType == 'lighting2'
           if type == 'switch'
             if value then this.lightwave2.switchOn(code + "/" + unitcode) else this.lightwave2.switchOff(code + "/" + unitcode)
+          if type == 'dimmerSwitch'
+            value = Math.round(value * 0.15)
+            this.lightwave2.setLevel(code + "/" + unitcode, value)
 
         resolve()
 

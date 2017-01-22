@@ -8,6 +8,7 @@
     "rfxcom-plugin.coffee",
     "rfxcom-protocol.coffee",
     "devices/rfxcom-power-switch.coffee",
+    "devices/rfxcom-power-dimmer.coffee",
     "devices/rfxcom-pir-sensor.coffee",
     "devices/rfxcom-contact-sensor.coffee",
     "README.md",
@@ -15,7 +16,7 @@
     "LICENSE",
     "device-config-schema.coffee"
   ],
-  "version": "1.0.1",
+  "version": "1.0.2",
   "homepage": "http://timvandevathorst.nl",
   "private": false,
   "repository": {
