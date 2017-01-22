@@ -5,7 +5,7 @@ module.exports = (env) ->
   _ = env.require 'lodash'
   commons = require('pimatic-plugin-commons')(env)
 
-  class RfxComPowerSwitch extends env.devices.DimmerActuator
+  class RfxComDimmerSwitch extends env.devices.DimmerActuator
     _lastdimlevel: null
 
     constructor: (@config, @plugin, lastState) ->
