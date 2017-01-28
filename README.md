@@ -1,8 +1,6 @@
 # pimatic-rfxcom
 
-Pimatic plugin for the RFXcom
-
-https://forum.pimatic.org/topic/2763/pimatic-rfxcom-major-update-1-0-0
+Pimatic plugin for the RFXcom based on node-rfxcom
 
 # Devices:
 The best way to add devices is via autodiscovery
